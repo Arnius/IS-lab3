@@ -78,7 +78,7 @@ w12 = rand(1);
 % Spindulio tipo bazinių funkcijų parametrai
 % Išrenkame visus galimus lokalius maksimumus ir sudedame jų x vertes
 % į centrų parametrų matricą
-c = local_maximums(x,d)
+c = local_maximums(x,d);
 
 % Parenkame spindulio didžius pagal savo nuožiūrą
 postumis = 1;   % Postumis lokalaus maksimumo x vertės atžvilgiu
@@ -120,7 +120,7 @@ while 1
     xlabel('x')
     
     % While ciklo nutraukimo sąlyga
-    if abs_e < abs_en, break, end
+    if (abs_e < abs_en) && (abs_e > -abs_en), break, end
     
     pause(0.5)
     delete(kreive)
@@ -128,10 +128,17 @@ while 1
 
     % Randam lokalius maksimumus iš aproksimuotos kreivės
     apx_max = local_maximums(apx_x, apx_y);
+    
+    % if isempty(apx_max)
+    %     apx_max(1,1) = apx_x(1,21);
+    %     apx_max(1,2) = apx_x(1,182);
+    % end
 
     % Paskaičiuojam bendrą aproksimuotos ir realios funkcijos paklaidą
     % pagal atimdami centrų reikšmes
     abs_e = 0;  % Ištrinama paskutinė paklaida
+    % Ieškomi indeksai su kuriais paėmus vertes iš x matricos gaunami y
+    % reikšmių maksimumai
     for indx = 1:length(apx_max)
          id1 = find(apx_max(1,indx) == apx_x);
          id2 = find(c(1,indx) == x);
@@ -139,12 +146,21 @@ while 1
     end
 
     % Parenkam naujus spindulius
+    % Jei kreivė aukščiau aproksimuojamų taškų
     if abs_e > 0.5
         postumis = postumis + 1;
         r = radius_update(x, c, postumis)
-    else
+    elseif (abs_e < 0.5) && (abs_e > 0)
         for indx=1:length(r)
             r(1,indx)= r(1,indx) + 0.01
+        end
+    % Jei kreive žemiau aproksimuojamų taškų
+    elseif abs_e < -0.5
+        postumis = postumis - 1;
+        r = radius_update(x, c, postumis)
+    elseif (abs_e > -0.5) && (abs_e < 0)
+        for indx=1:length(r)
+            r(1,indx)= r(1,indx) - 0.01
         end
     end
 
